@@ -6,6 +6,7 @@ pub struct Pallet {
 }
 
 impl Pallet{
+    
     pub fn new() -> Self {
         Self { balances: BTreeMap::new() }
     }
