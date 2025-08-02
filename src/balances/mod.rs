@@ -1,8 +1,11 @@
 use std::collections::BTreeMap;
 
+type AccountId = String;
+type Balance = u128;
+
 #[derive(Debug)]
 pub struct Pallet {
-    balances: BTreeMap<String,u128>
+    balances: BTreeMap<AccountId,Balance>
 }
 
 impl Pallet{
@@ -11,17 +14,17 @@ impl Pallet{
         Self { balances: BTreeMap::new() }
     }
 
-    pub fn set_balance(&mut self,user: &String,amount:u128) {
+    pub fn set_balance(&mut self,user: &AccountId,amount:Balance) {
 
         self.balances.insert(user.clone(), amount);
     }
 
-    pub fn get_balances(&self, user: &String) -> u128 {
+    pub fn get_balances(&self, user: &AccountId) -> Balance {
         *self.balances.get(user).unwrap_or(&0)
     }
 
 
-    pub fn transfer(&mut self, caller: &str,to: &str,amount:u128) -> Result<(),&'static str> {
+    pub fn transfer(&mut self, caller: &AccountId,to: &AccountId,amount:Balance) -> Result<(),&'static str> {
 
         let caller = caller.to_string();
         let to = to.to_string();
@@ -84,7 +87,7 @@ mod tests {
         
         // transferring from Alice to Bob
 
-        match pallet.transfer("Alice", "Bob", 1000) {
+        match pallet.transfer(&"Alice".to_string(), &"Bob".to_owned(), 1000) {
             Ok(()) => {
                 let balance_alice = pallet.get_balances(&"Alice".to_string());
                 let balance_bob = pallet.get_balances(&"Bob".to_string());
