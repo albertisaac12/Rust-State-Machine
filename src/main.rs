@@ -6,10 +6,19 @@ mod system;
 use system::Pallet as sys_Pallet;
 use balances::Pallet as bal_Pallet;
 
+mod types {
+    pub type BlockNumber = u32;
+    pub type Nonce = u32;
+    pub type AccountId = String;
+    pub type Balance = u128;
+}
+
+use types::*;
+
 #[derive(Debug)]
 pub struct Runtime {
-    system : sys_Pallet,
-    balances: bal_Pallet
+    system : sys_Pallet::<BlockNumber,AccountId,Nonce>,
+    balances: bal_Pallet::<AccountId,Balance>
 }
 
 impl Runtime {

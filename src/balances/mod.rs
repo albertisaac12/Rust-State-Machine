@@ -1,14 +1,18 @@
 use std::collections::BTreeMap;
+use num::{CheckedAdd,CheckedSub,Zero};
+// use std::fmt::Display;
 
-type AccountId = String;
-type Balance = u128;
+
+// type AccountId = String;
+// type Balance = u128;
+
 
 #[derive(Debug)]
-pub struct Pallet {
+pub struct Pallet<AccountId,Balance> {
     balances: BTreeMap<AccountId,Balance>
 }
 
-impl Pallet{
+impl<AccountId,Balance> Pallet<AccountId,Balance> where AccountId: Ord + Clone, Balance: CheckedAdd+ CheckedSub + Zero + Copy {
     
     pub fn new() -> Self {
         Self { balances: BTreeMap::new() }
@@ -20,22 +24,22 @@ impl Pallet{
     }
 
     pub fn get_balances(&self, user: &AccountId) -> Balance {
-        *self.balances.get(user).unwrap_or(&0)
+        *self.balances.get(user).unwrap_or(&Balance::zero())
     }
 
 
     pub fn transfer(&mut self, caller: &AccountId,to: &AccountId,amount:Balance) -> Result<(),&'static str> {
 
-        let caller = caller.to_string();
-        let to = to.to_string();
+        // let caller = caller.to_string();
+        // let to = to.to_string();
         
         let balance_caller = self.get_balances(&caller);
-        let new_from_balance = balance_caller.checked_sub(amount).ok_or("Underflow")?;
-        self.balances.insert(caller, new_from_balance); 
+        let new_from_balance = balance_caller.checked_sub(&amount).ok_or("Underflow")?;
+        self.balances.insert(caller.clone(), new_from_balance); 
 
         let balance_to = self.get_balances(&to);
-        let new_balance_to = balance_to.checked_add(amount).ok_or("Overflow")?;
-        self.balances.insert(to, new_balance_to);
+        let new_balance_to = balance_to.checked_add(&amount).ok_or("Overflow")?;
+        self.balances.insert(to.clone(), new_balance_to);
 
         Ok(())
     }
@@ -51,7 +55,7 @@ mod tests {
 
     #[test]
     fn test_new_creation_of_pallet() {
-        let p1 = Pallet::new();
+        let p1:Pallet<String,u128> = Pallet::new();
         let empty = *p1.balances.get(&"meow".to_string()).unwrap_or(&0);
         assert_eq!(empty,0);
     }
@@ -68,7 +72,7 @@ mod tests {
 
     
     #[fixture]
-    fn create_two_users_with_1000_balance() -> Pallet{
+    fn create_two_users_with_1000_balance() -> Pallet::<String,u128>{
         let user1 = String::from("Alice");
         let user2 = String::from("Bob");
 
@@ -81,7 +85,7 @@ mod tests {
     }
 
     #[rstest]
-    fn test_balance_transfer(create_two_users_with_1000_balance:Pallet) {
+    fn test_balance_transfer(create_two_users_with_1000_balance:Pallet::<String,u128>) {
         let mut pallet = create_two_users_with_1000_balance;
         println!("{:?}",pallet);
         
