@@ -5,30 +5,32 @@ use num::{CheckedAdd,CheckedSub,Zero};
 
 // type AccountId = String;
 // type Balance = u128;
-
-
+pub trait Config {
+    type AccountId : Ord + Clone;
+    type Balance: CheckedAdd+ CheckedSub + Zero + Copy;
+}
 #[derive(Debug)]
-pub struct Pallet<AccountId,Balance> {
-    balances: BTreeMap<AccountId,Balance>
+pub struct Pallet<T:Config> {
+    balances: BTreeMap<T::AccountId,T::Balance>
 }
 
-impl<AccountId,Balance> Pallet<AccountId,Balance> where AccountId: Ord + Clone, Balance: CheckedAdd+ CheckedSub + Zero + Copy {
+impl<T> Pallet<T> where T: Config {
     
     pub fn new() -> Self {
         Self { balances: BTreeMap::new() }
     }
 
-    pub fn set_balance(&mut self,user: &AccountId,amount:Balance) {
+    pub fn set_balance(&mut self,user: &T::AccountId,amount:T::Balance) {
 
         self.balances.insert(user.clone(), amount);
     }
 
-    pub fn get_balances(&self, user: &AccountId) -> Balance {
-        *self.balances.get(user).unwrap_or(&Balance::zero())
+    pub fn get_balances(&self, user: &T::AccountId) -> T::Balance {
+        *self.balances.get(user).unwrap_or(&T::Balance::zero())
     }
 
 
-    pub fn transfer(&mut self, caller: &AccountId,to: &AccountId,amount:Balance) -> Result<(),&'static str> {
+    pub fn transfer(&mut self, caller: &T::AccountId,to: &T::AccountId,amount:T::Balance) -> Result<(),&'static str> {
 
         // let caller = caller.to_string();
         // let to = to.to_string();
@@ -53,9 +55,17 @@ mod tests {
     use super::*;
     use rstest::{rstest,fixture};
 
+    #[derive(Debug)]
+    struct testConfig;
+
+    impl super::Config for testConfig {
+        type AccountId = String;
+        type Balance = u128;
+    }
+
     #[test]
     fn test_new_creation_of_pallet() {
-        let p1:Pallet<String,u128> = Pallet::new();
+        let p1:Pallet<testConfig> = Pallet::new();
         let empty = *p1.balances.get(&"meow".to_string()).unwrap_or(&0);
         assert_eq!(empty,0);
     }
@@ -63,7 +73,7 @@ mod tests {
 
     #[test]
     fn test_set_balance() {
-        let mut p1 = Pallet::new();
+        let mut p1 = Pallet::<testConfig>::new();
         p1.set_balance(&"Kitty".to_string(), 1000);
 
         let balance_kitty = p1.get_balances(&"Kitty".to_string());
@@ -72,7 +82,7 @@ mod tests {
 
     
     #[fixture]
-    fn create_two_users_with_1000_balance() -> Pallet::<String,u128>{
+    fn create_two_users_with_1000_balance() -> Pallet::<testConfig>{
         let user1 = String::from("Alice");
         let user2 = String::from("Bob");
 
@@ -85,7 +95,7 @@ mod tests {
     }
 
     #[rstest]
-    fn test_balance_transfer(create_two_users_with_1000_balance:Pallet::<String,u128>) {
+    fn test_balance_transfer(create_two_users_with_1000_balance:Pallet::<testConfig>) {
         let mut pallet = create_two_users_with_1000_balance;
         println!("{:?}",pallet);
         
