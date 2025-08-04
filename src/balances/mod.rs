@@ -29,7 +29,7 @@ impl<T> Pallet<T> where T: Config {
     }
 
 
-    pub fn transfer(&mut self, caller: &T::AccountId,to: &T::AccountId,amount:T::Balance) -> Result<(),&'static str> {
+    pub fn transfer(&mut self, caller: &T::AccountId,to: &T::AccountId,amount:T::Balance) -> crate::support::DispatchResult {
 
         // let caller = caller.to_string();
         // let to = to.to_string();

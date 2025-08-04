@@ -1,17 +1,25 @@
 mod balances;
 mod system;
+mod support;
 
 // use std::thread::panicking;
 
 use system::Pallet as sys_Pallet;
 use balances::Pallet as bal_Pallet;
 
-// mod types {
-//     pub type BlockNumber = u32;
-//     pub type Nonce = u32;
-//     pub type AccountId = String;
-//     pub type Balance = u128;
-// }
+mod types {
+    use crate::support;
+
+    pub type BlockNumber = u32;
+    pub type Nonce = u32;
+    pub type AccountId = String;
+    pub type Balance = u128;
+
+    pub type Extrinsic = support::Extrinsic<AccountId,crate::RuntimeCall>;
+    pub type Header = support::Header<BlockNumber>;
+    pub type Block = support::Block<Header,Extrinsic>;
+
+}
 
 // use types::*;
 
@@ -40,6 +48,11 @@ impl Runtime {
         let balances = bal_Pallet::new();
         Self { system, balances}
     }
+}
+
+
+pub enum RuntimeCall { // Will represent all the various calls exposed by different Pallets or rather our blockchain to the users
+
 }
 
 fn main() {
