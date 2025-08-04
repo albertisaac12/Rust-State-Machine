@@ -5,8 +5,7 @@ use num::{CheckedAdd,CheckedSub,Zero};
 
 // type AccountId = String;
 // type Balance = u128;
-pub trait Config {
-    type AccountId : Ord + Clone;
+pub trait Config: crate::system::Config {
     type Balance: CheckedAdd+ CheckedSub + Zero + Copy;
 }
 #[derive(Debug)]
@@ -59,8 +58,14 @@ mod tests {
     struct testConfig;
 
     impl super::Config for testConfig {
-        type AccountId = String;
+        // type AccountId = String;
         type Balance = u128;
+    }
+
+    impl crate::system::Config for testConfig {
+        type AccountId = String;
+        type BlockNumber = u32;
+        type Nonce = u32;
     }
 
     #[test]
