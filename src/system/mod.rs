@@ -6,23 +6,14 @@ pub trait Config {
     type Nonce: Zero + One + CheckedAdd + Copy;
     type AccountId: Ord + Clone;
 }
-
-// type BlockNumber = u32;
-// type Nonce = u32;
-// type AccountId = String;
 #[derive(Debug)]
-pub struct Pallet<T:Config> { // u32 , String , u32
+pub struct Pallet<T:Config> { 
     block_number : T::BlockNumber,
     nonce: BTreeMap<T::AccountId,T::Nonce>
 }
 
-
-// impl<BlockNumber,AccountId,Nonce> Config for Pallet<BlockNumber,AccountId,Nonce> {
-    
-// }
-
 impl<T> Pallet<T> where T: Config{
-	/// Create a new instance of the System Pallet.
+
 	pub fn new() -> Self {
 		Self { block_number: T::BlockNumber::zero() , nonce: BTreeMap::new() }
 	}

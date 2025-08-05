@@ -11,24 +11,60 @@ This project implements a simple state machine in Rust, featuring a modular desi
 ## Modules
 
 ### `main.rs`
-- Imports and initializes the `system` and `balances` modules.
-- Defines the `Runtime` struct, which integrates the `system` and `balances` pallets.
-- Implements configurations for the `system` and `balances` modules.
-- Demonstrates the creation of a genesis state and basic operations.
+The `main.rs` file serves as the entry point of the application. It integrates the `system` and `balances` modules into a unified runtime and demonstrates their usage.
+
+#### Key Components:
+- **`Runtime` Struct**: Combines the `system` and `balances` pallets.
+  - **Generics**: The `Runtime` struct does not directly use generics but implements traits (`system::Config` and `balances::Config`) that define the types for `AccountId`, `BlockNumber`, `Nonce`, and `Balance`.
+- **`execute_block` Function**: Processes a block by incrementing the block number, validating the block, and dispatching extrinsics.
+  - **Generics**: Uses `types::Block`, which is defined as `Block<Header, Extrinsic>`. Here:
+    - `Header` is `Header<BlockNumber>`.
+    - `Extrinsic` is `Extrinsic<AccountId, RuntimeCall>`.
+
+#### Important Terms:
+- **`Extrinsic`**: Represents a transaction or operation in the blockchain.
+- **`DispatchResult`**: Indicates the success or failure of a dispatched operation.
 
 ### `balances` Module
-- Manages account balances using a `BTreeMap`.
-- Provides the following functionalities:
-  - `set_balance`: Sets the balance for a specific account.
-  - `get_balances`: Retrieves the balance of a specific account.
-  - `transfer`: Transfers balance from one account to another, ensuring no underflow or overflow occurs.
+The `balances` module manages account balances and provides functionality for balance transfers.
+
+#### Key Components:
+- **`Pallet` Struct**: Stores balances in a `BTreeMap`.
+  - **Generics**: `Pallet<T>`:
+    - `T` is a type that implements the `Config` trait.
+    - `T::AccountId` is the type for account identifiers.
+    - `T::Balance` is the type for balances.
+- **`set_balance` Function**: Sets the balance for a specific account.
+  - **Generics**: Uses `T::AccountId` and `T::Balance`.
+- **`transfer` Function**: Transfers balance between accounts, ensuring no underflow or overflow occurs.
+  - **Generics**: Uses `T::AccountId` and `T::Balance`.
+
+#### Important Terms:
+- **`Call` Enum**: Represents the operations that can be performed, such as `Transfer`.
+  - **Generics**: `Call<T>`:
+    - `T` is a type that implements the `Config` trait.
+    - `T::AccountId` and `T::Balance` are used in the `Transfer` variant.
+- **`Dispatch` Trait**: Allows the module to handle calls and dispatch them appropriately.
+  - **Generics**: `Dispatch` is implemented for `Pallet<T>`, where `T` implements `Config`.
 
 ### `system` Module
-- Manages block numbers and account nonces using a `BTreeMap`.
-- Provides the following functionalities:
-  - `block_number`: Retrieves the current block number.
-  - `inc_block_number`: Increments the block number.
-  - `inc_nonce`: Increments the nonce for a specific account.
+The `system` module manages block numbers and account nonces.
+
+#### Key Components:
+- **`Pallet` Struct**: Stores the current block number and account nonces.
+  - **Generics**: `Pallet<T>`:
+    - `T` is a type that implements the `Config` trait.
+    - `T::BlockNumber` is the type for block numbers.
+    - `T::Nonce` is the type for nonces.
+    - `T::AccountId` is the type for account identifiers.
+- **`inc_block_number` Function**: Increments the block number.
+  - **Generics**: Uses `T::BlockNumber`.
+- **`inc_nonce` Function**: Increments the nonce for a specific account.
+  - **Generics**: Uses `T::AccountId` and `T::Nonce`.
+
+#### Important Terms:
+- **`Nonce`**: A unique number used to prevent replay attacks.
+- **`BlockNumber`**: Represents the current block in the blockchain.
 
 ## Dependencies
 - `num`: Used for numeric operations like `CheckedAdd` and `CheckedSub`.

@@ -1,10 +1,6 @@
 use std::collections::BTreeMap;
 use num::{CheckedAdd,CheckedSub,Zero};
-// use std::fmt::Display;
 
-
-// type AccountId = String;
-// type Balance = u128;
 pub trait Config: crate::system::Config {
     type Balance: CheckedAdd+ CheckedSub + Zero + Copy;
 }
@@ -31,9 +27,7 @@ impl<T> Pallet<T> where T: Config {
 
     pub fn transfer(&mut self, caller: &T::AccountId,to: &T::AccountId,amount:T::Balance) -> crate::support::DispatchResult {
 
-        // let caller = caller.to_string();
-        // let to = to.to_string();
-        
+ 
         let balance_caller = self.get_balances(&caller);
         let new_from_balance = balance_caller.checked_sub(&amount).ok_or("Underflow")?;
         self.balances.insert(caller.clone(), new_from_balance); 
@@ -46,6 +40,31 @@ impl<T> Pallet<T> where T: Config {
     }
 }
 
+
+pub enum Call<T:Config> {
+    Transfer {
+        to :T::AccountId,
+        amount :T::Balance
+    }
+}
+
+
+impl<T: Config> crate::support::Dispatch for Pallet<T> {
+    
+    type Caller = T::AccountId;
+    type Call = Call<T>;
+
+    fn dispatch(&mut self, caller: Self::Caller, call: Self::Call) -> crate::support::DispatchResult {
+        
+        match call {
+            Call::Transfer { to, amount } => {
+                self.transfer(&caller, &to, amount)?;
+            }
+        }
+
+        Ok(())
+    }
+}
 
 
 
@@ -61,7 +80,7 @@ mod tests {
     struct testConfig;
 
     impl super::Config for testConfig {
-        // type AccountId = String;
+
         type Balance = u128;
     }
 
@@ -107,7 +126,7 @@ mod tests {
         let mut pallet = create_two_users_with_1000_balance;
         println!("{:?}",pallet);
         
-        // transferring from Alice to Bob
+   
 
         match pallet.transfer(&"Alice".to_string(), &"Bob".to_owned(), 1000) {
             Ok(()) => {
